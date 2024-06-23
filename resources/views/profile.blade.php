@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{{-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -42,4 +42,14 @@
 
     @vite('resources/js/app.js')
 </body>
-</html>
+</html> --}}
+
+
+
+{{-- Penyesuaian File View untuk Halaman Profile --}}
+
+@extends('layouts.app')
+
+@section('content')
+    @include('default')
+@endsection
