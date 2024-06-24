@@ -1,4 +1,4 @@
-{{-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -97,12 +97,12 @@
     @vite('resources/js/app.js')
 </body>
 
-</html> --}}
+</html>
 
 
 
 
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
 
@@ -147,4 +147,4 @@
             </table>
         </div>
     </div>
-@endsection
+@endsection --}}
