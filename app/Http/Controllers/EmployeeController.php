@@ -7,34 +7,28 @@ use Illuminate\Support\Facades\Validator; // Import Validator
 use Illuminate\Support\Facades\DB; // memanggil Facade DB
 use App\Models\Employee;    // memanggil model employee
 use App\Models\Position; // memanggil model position
+use RealRashid\SweetAlert\Facades\Alert;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EmployeesExport;
+use PDF;
 
 class EmployeeController extends Controller
 {
+
     public function index()
     {
         $pageTitle = 'Employee List';
-
-        // RAW SQL QUERY
-        // $employees = DB::select('
-        //     select *, employees.id as employee_id, positions.name as position_name
-        //     from employees
-        //     left join positions on employees.position_id = positions.id
-        // ');
-
-        // QUERY BUILDER
-        // $employees = DB::table('employees')
-        //     ->select('*', 'employees.id as employee_id', 'positions.name as position_name')
-        //     ->leftJoin('positions', 'employees.position_id', '=', 'positions.id')
-        //     ->get();
-
-        // ELOQUENT
+        confirmDelete();
+        $employees = Employee::with('position')->get();
+        $positions = Position::all();
         $employees = Employee::all();
 
-
-        return view('employee.index', [
+        return view('employee.index',[
             'pageTitle' => $pageTitle,
+            'positions' => $positions,
             'employees' => $employees
-        ]);
+     ]);
+
     }
 
     public function create()
@@ -87,6 +81,8 @@ class EmployeeController extends Controller
         // ELOQUENT
         Employee::find($id)->delete();
 
+        Alert::success('Deleted Successfully', 'Employee Data Deleted Successfully.');
+
         return redirect()->route('employees.index');
     }
 
@@ -134,6 +130,8 @@ class EmployeeController extends Controller
         }
 
         $employee->save();
+
+        Alert::success('Added Successfully', 'Employee Data Added Successfully.');
 
         return redirect()->route('employees.index');
     }
@@ -195,6 +193,7 @@ class EmployeeController extends Controller
         $employee->position_id = $request->position;
         $employee->save();
 
+        Alert::success('Changed Successfully', 'Employee Data Changed Successfully.');
 
         return redirect()->route('employees.index');
     }
@@ -208,6 +207,35 @@ class EmployeeController extends Controller
         if (Storage::exists($encryptedFilename)) {
             return Storage::download($encryptedFilename, $downloadFilename);
         }
+    }
+
+
+    public function getData(Request $request)
+    {
+        $employees = Employee::with('position');
+
+        if ($request->ajax()) {
+            return datatables()->of($employees)
+                ->addIndexColumn()
+                ->addColumn('actions', function ($employee) {
+                    return view('employee.actions', compact('employee'));
+                })
+                ->toJson();
+        }
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new EmployeesExport, 'employees.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $employees = Employee::all();
+
+        $pdf = PDF::loadView('employee.export_pdf', compact('employees'));
+
+        return $pdf->download('employees.pdf');
     }
 }
 
